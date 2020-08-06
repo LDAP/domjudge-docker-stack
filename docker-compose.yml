@@ -13,7 +13,7 @@ services:
     depends_on:
       - "db"
     ports:
-      - ${PORT}:80
+      - ${BIND_IP}:${PORT}:80
   judge:
     image: "domjudge/judgehost"
     restart: on-failure
@@ -24,6 +24,7 @@ services:
     depends_on:
       - "domserver"
     privileged: true
+    hostname: jh
     volumes:
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
   db:
