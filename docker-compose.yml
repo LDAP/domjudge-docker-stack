@@ -1,0 +1,40 @@
+version: '2.0'
+services:
+  domserver:
+    image: "domjudge/domserver"
+    restart: always
+    environment:
+      MYSQL_HOST: "db"
+      MYSQL_USER: "domjudge"
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: "domjudge"
+      DJ_DB_INSTALL_BARE: "0"
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+    depends_on:
+      - "db"
+    ports:
+      - ${PORT}:80
+  judge:
+    image: "domjudge/judgehost"
+    restart: on-failure
+    environment:
+      DOMSERVER_BASEURL: "http://domserver/"
+      JUDGEDAEMON_USERNAME: "judgehost"
+      JUDGEDAEMON_PASSWORD: ${JUDGE_PASS}
+    depends_on:
+      - "domserver"
+    privileged: true
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  db:
+    image: "mariadb"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: "domjudge"
+      MYSQL_USER: "domjudge"
+      MYSQL_PASSWORD: ${DB_PASS}
+    expose:
+      - "3306"
+    volumes:
+      - ./data:/var/lib/mysql
