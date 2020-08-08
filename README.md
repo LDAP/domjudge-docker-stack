@@ -1,6 +1,6 @@
-# DOMJUDGE docker-compose
+# DomJudge docker-stack
 
-THE DOMJUDGE BINDS TO 0.0.0.0:PORT! CONFIGURE A PROPER FIREWALL TO RESTRICT ACCESS!
+DOMJUDGE WEB SERVICE BINDS TO 0.0.0.0:PORT! CONFIGURE A PROPER FIREWALL TO RESTRICT ACCESS!
 
 ## Usage
 
@@ -40,7 +40,7 @@ docker stack deploy -c <(docker-compose -f docker-compose.yml config) DomJudge
 ```
 docker service scale Domjudge_judge=number
 ```
-- Add nodes to the swarm: This distributes the judgehosts along the nodes
+- Add nodes to the swarm: This distributes the judgehosts along the nodes (rescaling may be needed)
 ```
 # Retrieve the join command for a worker (on the manager)
 docker swarm join-token worker
