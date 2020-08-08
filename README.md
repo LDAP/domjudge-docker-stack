@@ -36,7 +36,16 @@ docker stack deploy -c <(docker-compose -f docker-compose.yml config) DomJudge
 
 ## Advanced
 
-### Set the number of JudgeHosts
+- Set the number of JudgeHosts
 ```
 docker service scale Domjudge_judge=number
 ```
+- Add nodes to the swarm: This distributes the judgehosts along the nodes
+```
+# Retrieve the join command for a worker (on the manager)
+docker swarm join-token worker
+# Add the node (on the worker)
+docker swarm join --token <token> IP:Port
+```
+- Set the data path  
+    Edit the PATH Variable in the .env file
