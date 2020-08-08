@@ -1,41 +1,64 @@
-version: '2.0'
+version: '3.6'
 services:
   domserver:
     image: "domjudge/domserver"
-    restart: always
     environment:
       MYSQL_HOST: "db"
       MYSQL_USER: "domjudge"
-      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_PASSWORD: "${DB_PASS}"
       MYSQL_DATABASE: "domjudge"
       DJ_DB_INSTALL_BARE: "0"
-      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: "${DB_PASS}"
     depends_on:
       - "db"
+    networks:
+      - domjudge
     ports:
-      - ${BIND_IP}:${PORT}:80
+      - target: 80
+        published: ${PORT}
+        protocol: tcp
+        mode: ${MODE}
+    deploy:
+      restart_policy:
+        condition: on-failure
   judge:
-    image: "domjudge/judgehost"
-    restart: on-failure
+    image: "lalber/swarm-launcher"
     environment:
-      DOMSERVER_BASEURL: "http://domserver/"
-      JUDGEDAEMON_USERNAME: "judgehost"
-      JUDGEDAEMON_PASSWORD: ${JUDGE_PASS}
+      LAUNCH_IMAGE: "domjudge/judgehost"
+      LAUNCH_PRIVILEGED: "true"
+      LAUNCH_PULL: "true"
+      LAUNCH_ENVIRONMENTS: "DEAMON_ID={{.Task.Slot}} DOMSERVER_BASEURL=http://domserver/ JUDGEDAEMON_USERNAME=judgehost JUDGEDAEMON_PASSWORD=${JUDGE_PASS}"
+      LAUNCH_VOLUMES: "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+      LAUNCH_PROJECT_NAME: "jh-{{.Task.Slot}}"
+      LAUNCH_SERVICE_NAME: "jh-{{.Task.Slot}}"
+      LAUNCH_CONTAINER_NAME: "jh-{{.Task.Slot}}"
+      LAUNCH_EXT_NETWORKS: "DomJudge_domjudge"
+      LAUNCH_HOSTNAME: "jh-{{.Task.Slot}}"
     depends_on:
       - "domserver"
-    privileged: true
-    hostname: jh
+    hostname: "jh-{{.Task.Slot}}"
+    networks:
+      - domjudge
     volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      restart_policy:
+        condition: on-failure
   db:
     image: "mariadb"
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: "${DB_PASS}"
       MYSQL_DATABASE: "domjudge"
       MYSQL_USER: "domjudge"
-      MYSQL_PASSWORD: ${DB_PASS}
-    expose:
-      - "3306"
+      MYSQL_PASSWORD: "${DB_PASS}"
     volumes:
-      - ./data:/var/lib/mysql
+      - ${DATA_PATH}:/var/lib/mysql
+    networks:
+      - domjudge
+    deploy:
+      restart_policy:
+        condition: on-failure
+networks:
+  domjudge:
+    driver: overlay
+    attachable: true

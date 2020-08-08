@@ -1,6 +1,6 @@
 # DOMJUDGE docker-compose
 
-THIS IS MENT FOR LOCAL TESTING!
+THE DOMJUDGE BINDS TO 0.0.0.0:PORT! CONFIGURE A PROPER FIREWALL TO RESTRICT ACCESS!
 
 ## Usage
 
@@ -8,7 +8,10 @@ THIS IS MENT FOR LOCAL TESTING!
 - Start the stack using
 
 ```
-docker-compose up
+docker swarm init
+docker stack deploy -c <(docker-compose -f docker-compose.yml config) DomJudge
+# Monitor logs
+docker service logs -f DomJudge_domserver 
 ```
 
 - Wait until the domserver connects to the database and displays:
@@ -25,7 +28,15 @@ domserver_1  | Initial judgehost password is XXXXXXXXXXXXX
 - _THEN_ restart with
 
 ```
-docker-compose down
-docker-compose up
+# Stop the stack
+docker stack rm DomJudge
+# Restart
+docker stack deploy -c <(docker-compose -f docker-compose.yml config) DomJudge
 ```
 
+## Advanced
+
+### Set the number of JudgeHosts
+```
+docker service scale Domjudge_judge=number
+```
