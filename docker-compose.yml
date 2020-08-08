@@ -52,7 +52,7 @@ services:
       MYSQL_USER: "domjudge"
       MYSQL_PASSWORD: "${DB_PASS}"
     volumes:
-      - ~/data:/var/lib/mysql
+      - ${DATA_PATH}:/var/lib/mysql
     networks:
       - domjudge
     deploy:
