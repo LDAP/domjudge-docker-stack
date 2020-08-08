@@ -11,30 +11,35 @@ services:
       MYSQL_ROOT_PASSWORD: "${DB_PASS}"
     depends_on:
       - "db"
+    networks:
+      - domjudge
     ports:
       - target: 80
         published: ${PORT}
         protocol: tcp
         mode: ${MODE}
-
     deploy:
       restart_policy:
         condition: on-failure
   judge:
-    image: "domjudge/judgehost"
+    image: "ixdotai/swarm-launcher"
     environment:
-      DAEMON_ID: "{{.Task.Slot}}"
-      DOMSERVER_BASEURL: "http://domserver/"
-      JUDGEDAEMON_USERNAME: "judgehost"
-      JUDGEDAEMON_PASSWORD: "${JUDGE_PASS}"
+      LAUNCH_IMAGE: "domjudge/judgehost"
+      LAUNCH_PRIVILEGED: "true"
+      LAUNCH_PULL: "true"
+      LAUNCH_ENVIRONMENTS: "DEAMON_ID={{.Task.Slot}} DOMSERVER_BASEURL=http://domserver/ JUDGEDAEMON_USERNAME=judgehost JUDGEDAEMON_PASSWORD=${JUDGE_PASS}"
+      LAUNCH_VOLUMES: "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+      LAUNCH_PROJECT_NAME: "jh-{{.Task.Slot}}"
+      LAUNCH_SERVICE_NAME: "jh-{{.Task.Slot}}"
+      LAUNCH_CONTAINER_NAME: "jh-{{.Task.Slot}}"
+      LAUNCH_EXT_NETWORKS: "DomJudge_domjudge"
     depends_on:
       - "domserver"
     hostname: "jh-{{.Task.Slot}}"
+    networks:
+      - domjudge
     volumes:
-      - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    tmpfs:
-      - "/run"
-      - "/tmp"
+      - /var/run/docker.sock:/var/run/docker.sock
     deploy:
       restart_policy:
         condition: on-failure
@@ -47,6 +52,12 @@ services:
       MYSQL_PASSWORD: "${DB_PASS}"
     volumes:
       - ~/data:/var/lib/mysql
+    networks:
+      - domjudge
     deploy:
       restart_policy:
         condition: on-failure
+networks:
+  domjudge:
+    driver: overlay
+    attachable: true
