@@ -12,7 +12,7 @@ services:
     depends_on:
       - "db"
     networks:
-      - domjudge
+      - judge
     ports:
       - target: 80
         published: ${PORT}
@@ -32,13 +32,13 @@ services:
       LAUNCH_PROJECT_NAME: "jh-{{.Task.Slot}}"
       LAUNCH_SERVICE_NAME: "jh-{{.Task.Slot}}"
       LAUNCH_CONTAINER_NAME: "jh-{{.Task.Slot}}"
-      LAUNCH_EXT_NETWORKS: "DomJudge_domjudge"
+      LAUNCH_EXT_NETWORKS: "{{.Service.Name}}"
       LAUNCH_HOSTNAME: "jh-{{.Task.Slot}}"
     depends_on:
       - "domserver"
     hostname: "jh-{{.Task.Slot}}"
     networks:
-      - domjudge
+      - judge
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
@@ -54,11 +54,11 @@ services:
     volumes:
       - ${DATA_PATH}:/var/lib/mysql
     networks:
-      - domjudge
+      - judge
     deploy:
       restart_policy:
         condition: on-failure
 networks:
-  domjudge:
+  judge:
     driver: overlay
     attachable: true
