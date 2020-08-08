@@ -22,7 +22,7 @@ services:
       restart_policy:
         condition: on-failure
   judge:
-    image: "ixdotai/swarm-launcher"
+    image: "lalber/swarm-launcher"
     environment:
       LAUNCH_IMAGE: "domjudge/judgehost"
       LAUNCH_PRIVILEGED: "true"
@@ -33,6 +33,7 @@ services:
       LAUNCH_SERVICE_NAME: "jh-{{.Task.Slot}}"
       LAUNCH_CONTAINER_NAME: "jh-{{.Task.Slot}}"
       LAUNCH_EXT_NETWORKS: "DomJudge_domjudge"
+      LAUNCH_HOSTNAME: "jh-{{.Task.Slot}}"
     depends_on:
       - "domserver"
     hostname: "jh-{{.Task.Slot}}"
