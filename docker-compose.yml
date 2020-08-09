@@ -50,6 +50,9 @@ services:
       restart_policy:
         condition: on-failure
         delay: 60s
+      placement:
+        constraints:
+          - "node.role!=${RESTRICT_JUDGE_ON}"
   db:
     image: "mariadb"
     environment:
