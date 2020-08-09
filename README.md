@@ -48,4 +48,6 @@ docker swarm join-token worker
 docker swarm join --token <token> IP:Port
 ```
 - Set the data path  
-    Edit the PATH Variable in the .env file
+    Edit the `PATH` Variable in the .env file
+- Run judges only on worker nodes  
+    Set the `RESTRICT_JUDGE_ON` Variable in the .env file to _manager_
