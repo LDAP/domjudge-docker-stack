@@ -21,6 +21,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
+        delay: 30s
       mode: global
       placement:
         constraints:
@@ -48,6 +49,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
+        delay: 60s
   db:
     image: "mariadb"
     environment:
